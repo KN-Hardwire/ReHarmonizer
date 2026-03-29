@@ -1,0 +1,9 @@
+build/
+.vs/
+.vscode/settings.json
+
+.DS_Store
+*.xcodeproj/
+*.xcworkspace/
+
+*.jucer
