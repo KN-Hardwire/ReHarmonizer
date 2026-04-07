@@ -1,0 +1,2 @@
+1. W przypadku gdy częstotliwość nie jest idealnie równa "czystemu" dźwiękowi, czy chcemy aby generowany dźwięk był dostrajany?
+2. 
