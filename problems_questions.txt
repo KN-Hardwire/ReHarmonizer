@@ -1,2 +1,9 @@
 1. W przypadku gdy częstotliwość nie jest idealnie równa "czystemu" dźwiękowi, czy chcemy aby generowany dźwięk był dostrajany?
+- Domyślnie dźwięk wychodzący nie jest dostrajany, ale zostawiamy użytkownikowi możliwość dostrojenia.
+  Docelowo we wtyczce będzie zaimplementowane pokrętło do zmiany stanu dostrojenia - z jednej strony stan surowy (bez
+  dostrojenia), z drugiej strony całkowite dostrojenie dźwięku (do zwykłego systemu, 12 nut/oktawę).
+  Pokrętło umożliwia nastrojenie wtyczki do własnego sposobu użycia (np. przy wokalu bardziej przyda się dostrojenie
+  niż przy elektronicznym flecie, który gra zaprogramowany dźwięk o stałej częstotliwości, przez co
+  nie wymaga dostrojenia).
+  
 2. 
