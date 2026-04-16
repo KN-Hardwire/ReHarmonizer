@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.22)
 
-project(PluginProject VERSION 0.0.1)
+project(ReHarmonizer VERSION 0.0.1)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -10,13 +10,13 @@ add_subdirectory(third_party/JUCE)
 # ==========================================
 # Plugin info
 # ==========================================
-juce_add_plugin(PluginProject
+juce_add_plugin(ReHarmonizer
 	COMPANY_NAME "HARDWIRE"
 	PLUGIN_MANUFACTURER_CODE KNHW
-	PLUGIN_CODE Pp01
+	PLUGIN_CODE RHRM
 
 	FORMATS AU VST3 Standalone
-	PRODUCT_NAME "PluginProject"
+	PRODUCT_NAME "ReHarmonizer"
 
 	IS_SYNTH FALSE
 	NEEDS_MIDI_INPUT FALSE
@@ -27,7 +27,7 @@ juce_add_plugin(PluginProject
 # ==========================================
 # Source files
 # ==========================================
-target_sources(PluginProject
+target_sources(ReHarmonizer
 	PRIVATE
 	Source/PluginSetupTest.cpp
 	# If your contribution adds a new source file, add it above this line 
@@ -36,7 +36,7 @@ target_sources(PluginProject
 # ==========================================
 # Compile definitions
 # ==========================================
-target_compile_definitions(PluginProject
+target_compile_definitions(ReHarmonizer
 	PUBLIC
 	JUCE_WEB_BROWSER=0
 	JUCE_USE_CURL=0
@@ -46,7 +46,7 @@ target_compile_definitions(PluginProject
 # ==========================================
 # Link JUCE modules
 # ==========================================
-target_link_libraries(PluginProject
+target_link_libraries(ReHarmonizer
 	PRIVATE
 	juce::juce_audio_basics
 	juce::juce_audio_devices
