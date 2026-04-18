@@ -29,7 +29,10 @@ juce_add_plugin(ReHarmonizer
 # ==========================================
 target_sources(ReHarmonizer
 	PRIVATE
-	Source/PluginSetupTest.cpp
+	Source/PluginProcessor.h
+	Source/PluginProcessor.cpp
+	Source/PluginEditor.h
+	Source/PluginEditor.cpp
 	# If your contribution adds a new source file, add it above this line 
 )
 
@@ -53,7 +56,6 @@ target_link_libraries(ReHarmonizer
     juce::juce_audio_formats
     juce::juce_audio_plugin_client
     juce::juce_audio_processors
-	juce::juce_audio_processors_headless
     juce::juce_audio_utils
     juce::juce_core
     juce::juce_data_structures
