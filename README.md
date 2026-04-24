@@ -3,7 +3,7 @@
 *Project in early stage of development*
 
 
-## Dependencies
+## Prerequisites
 
 - JUCE 8
 - CMake (version 3.22 or higher)
