@@ -1,0 +1,126 @@
+name: Build ReHarmonizer
+
+on:
+  push:
+    branches:
+      - '**'
+  pull_request:
+    branches:
+      - '**'
+
+jobs:
+
+  # ============================================================
+  # Linux — VST3
+  # ============================================================
+  build-linux:
+    name: Linux / VST3
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout (with JUCE submodule)
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      # JUCE on Linux requires several system libraries
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            cmake \
+            libasound2-dev \
+            libjack-jackd2-dev \
+            libfreetype6-dev \
+            libx11-dev \
+            libxcomposite-dev \
+            libxcursor-dev \
+            libxext-dev \
+            libxinerama-dev \
+            libxrandr-dev \
+            libxrender-dev \
+            libglu1-mesa-dev \
+            mesa-common-dev \
+            libwebkit2gtk-4.1-dev \
+            libcurl4-openssl-dev
+
+      - name: Configure CMake
+        run: |
+          cmake -B build \
+            -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build build --config Release --parallel $(nproc)
+
+      - name: Upload VST3 artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ReHarmonizer-Linux-VST3
+          path: build/PluginProject_artefacts/Release/VST3/
+          if-no-files-found: error
+
+  # ============================================================
+  # Windows — VST3
+  # ============================================================
+  build-windows:
+    name: Windows / VST3
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout (with JUCE submodule)
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Configure CMake
+        run: |
+          cmake -B build `
+            -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build build --config Release --parallel
+
+      - name: Upload VST3 artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ReHarmonizer-Windows-VST3
+          path: build/PluginProject_artefacts/Release/VST3/
+          if-no-files-found: error
+
+  # ============================================================
+  # macOS — VST3 + AU (universal binary: arm64 + x86_64)
+  # ============================================================
+  build-macos:
+    name: macOS / VST3 + AU
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout (with JUCE submodule)
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Configure CMake
+        run: |
+          cmake -B build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" \
+            -DCMAKE_OSX_DEPLOYMENT_TARGET="11.0"
+
+      - name: Build
+        run: cmake --build build --config Release --parallel $(sysctl -n hw.logicalcpu)
+
+      - name: Upload VST3 artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ReHarmonizer-macOS-VST3
+          path: build/PluginProject_artefacts/Release/VST3/
+          if-no-files-found: error
+
+      - name: Upload AU artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ReHarmonizer-macOS-AU
+          path: build/PluginProject_artefacts/Release/AU/
+          if-no-files-found: error
