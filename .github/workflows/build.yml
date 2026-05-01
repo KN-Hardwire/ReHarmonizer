@@ -57,7 +57,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ReHarmonizer-Linux-VST3
-          path: build/PluginProject_artefacts/Release/VST3/
+          path: build/ReHarmonizer_artefacts/Release/VST3/
           if-no-files-found: error
 
   # ============================================================
@@ -85,7 +85,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ReHarmonizer-Windows-VST3
-          path: build/PluginProject_artefacts/Release/VST3/
+          path: build/ReHarmonizer_artefacts/Release/VST3/
           if-no-files-found: error
 
   # ============================================================
@@ -115,12 +115,12 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ReHarmonizer-macOS-VST3
-          path: build/PluginProject_artefacts/Release/VST3/
+          path: build/ReHarmonizer_artefacts/Release/VST3/
           if-no-files-found: error
 
       - name: Upload AU artifact
         uses: actions/upload-artifact@v4
         with:
           name: ReHarmonizer-macOS-AU
-          path: build/PluginProject_artefacts/Release/AU/
+          path: build/ReHarmonizer_artefacts/Release/AU/
           if-no-files-found: error
