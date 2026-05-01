@@ -8,6 +8,16 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 add_subdirectory(third_party/JUCE)
 
 # ==========================================
+# Platform-specific plugin formats
+# AU is only supported on macOS
+# ==========================================
+if(APPLE)
+    set(PLUGIN_FORMATS AU VST3)
+else()
+    set(PLUGIN_FORMATS VST3)
+endif()
+
+# ==========================================
 # Plugin info
 # ==========================================
 juce_add_plugin(ReHarmonizer
@@ -15,7 +25,7 @@ juce_add_plugin(ReHarmonizer
 	PLUGIN_MANUFACTURER_CODE KNHW
 	PLUGIN_CODE RHRM
 
-	FORMATS AU VST3 Standalone
+	FORMATS ${PLUGIN_FORMATS}
 	PRODUCT_NAME "ReHarmonizer"
 
 	IS_SYNTH FALSE
