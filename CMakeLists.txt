@@ -28,9 +28,18 @@ juce_add_plugin(PluginProject
 # Source files
 # ==========================================
 target_sources(PluginProject
-	PRIVATE
-	Source/PluginSetupTest.cpp
-	# If your contribution adds a new source file, add it above this line 
+    PRIVATE
+    Source/Oscillator/src/PluginProcessor.cpp
+    Source/Oscillator/src/PluginEditor.cpp
+    # If your contribution adds a new source file, add it above this line 
+)
+
+# ==========================================
+# Include directories
+# ==========================================
+target_include_directories(PluginProject
+    PRIVATE
+    Source/Oscillator/include
 )
 
 # ==========================================
@@ -66,4 +75,30 @@ target_link_libraries(PluginProject
 	juce::juce_recommended_config_flags
 	juce::juce_recommended_lto_flags
 	juce::juce_recommended_warning_flags
+)
+
+# ==========================================
+# Tests
+# ==========================================
+add_executable(OscillatorTests
+    Source/Oscillator/tests/RunTests.cpp
+)
+
+target_include_directories(OscillatorTests
+    PRIVATE
+    Source/Oscillator/include
+    Source/Oscillator/tests
+)
+
+target_link_libraries(OscillatorTests
+    PRIVATE
+    PluginProject
+    juce::juce_audio_basics
+    juce::juce_core
+)
+
+target_compile_definitions(OscillatorTests
+    PRIVATE
+    JUCE_WEB_BROWSER=0
+    JUCE_USE_CURL=0
 )
