@@ -55,29 +55,29 @@ sudo apt install cmake git build-essential \
 ### Steps
 
 ```bash
-# 1. Sklonuj repo
+# 1. Clone the repository
 git clone <your-repo>
 cd <your-repo>
 
-# 2. Pobierz JUCE (submoduł)
+# 2. Fetch JUCE submodule
 git submodule update --init --recursive
 
-# 3. Skonfiguruj build
+# 3. Configure the build
 cmake -B build -DCMAKE_BUILD_TYPE=Release
 
-# 4. Zbuduj
+# 4. Build
 cmake --build build --config Release
 ```
 
-### Artefakty
+### Artifacts
 
 ```
 build/PluginProject_artefacts/Release/
-├── Standalone/PluginProject   ← aplikacja standalone
-└── VST3/PluginProject.vst3   ← plugin do DAW
+├── Standalone/PluginProject   ← standalone application
+└── VST3/PluginProject.vst3   ← plugin for your DAW
 ```
 
-### Uruchomienie Standalone
+### Running the Standalone App
 
 ```bash
 ./build/PluginProject_artefacts/Release/Standalone/PluginProject
@@ -86,12 +86,11 @@ build/PluginProject_artefacts/Release/
 ## Running Unit Tests
 
 ```bash
-# Zbuduj i odpal testy
 cmake --build build --target OscillatorTests
 ./build/OscillatorTests
 ```
 
-Oczekiwany output:
+Expected output:
 ```
 JUCE v8.x.x
 === Oscillator Unit Tests ===
@@ -104,16 +103,16 @@ JUCE v8.x.x
 === All tests passed! ===
 ```
 
-Testy sprawdzają:
-- Sine startuje od 0
-- Square zwraca tylko ±1
-- Saw/Triangle mieszczą się w [−1, 1]
-- Przełączanie waveformów
-- Reset fazy
+Tests cover:
+- Sine starts at phase 0
+- Square outputs only ±1
+- Saw/Triangle stay within [−1, 1]
+- Waveform switching
+- Phase reset
 
 ## Using the Oscillator Class
 
-`Oscillator.h` jest reużywalny — możesz go wrzucić do dowolnego projektu JUCE:
+`Oscillator.h` is reusable and can be dropped into any JUCE project:
 
 ```cpp
 #include "Oscillator.h"
@@ -123,13 +122,8 @@ osc.setSampleRate(44100.0);
 osc.setFrequency(440.0f);
 osc.setWaveform(Oscillator::Waveform::Square);
 
-// pojedynczy sample:
+// Single sample:
 float sample = osc.processSample();   // [-1, +1]
 
-// lub cały bufor:
+// Or fill an entire buffer:
 osc.processBlock(buffer, /*channel=*/0);
-```
-
-## License
-
-MIT – do whatever you like.
