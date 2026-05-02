@@ -3,7 +3,7 @@
 
 ReHarmonizerAudioProcessor::ReHarmonizerAudioProcessor()
 {
-    
+
 }
 
 ReHarmonizerAudioProcessor::~ReHarmonizerAudioProcessor()
@@ -55,7 +55,7 @@ void ReHarmonizerAudioProcessor::setCurrentProgram(int index)
 const juce::String ReHarmonizerAudioProcessor::getProgramName(int index)
 {
     juce::ignoreUnused(index);
-    return juce::String();  // return empty string
+    return juce::String();
 }
 
 void ReHarmonizerAudioProcessor::changeProgramName(int index, const juce::String& newName)
@@ -66,7 +66,10 @@ void ReHarmonizerAudioProcessor::changeProgramName(int index, const juce::String
 //==============================================================================
 void ReHarmonizerAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 {
-    juce::ignoreUnused(sampleRate, samplesPerBlock);
+    juce::ignoreUnused (samplesPerBlock);
+
+    freqDetector.prepare (sampleRate);
+
 }
 
 void ReHarmonizerAudioProcessor::releaseResources()
@@ -76,10 +79,9 @@ void ReHarmonizerAudioProcessor::releaseResources()
 
 bool ReHarmonizerAudioProcessor::isBusesLayoutSupported(const BusesLayout& layouts) const
 {
-    // Reject layout with no input - need at least a mono input
+
     if (layouts.getMainInputChannelSet() == juce::AudioChannelSet::disabled())
         return false;
-    // Output layout must match input layout
     if (layouts.getMainInputChannelSet() != layouts.getMainOutputChannelSet())
         return false;
     
@@ -88,10 +90,23 @@ bool ReHarmonizerAudioProcessor::isBusesLayoutSupported(const BusesLayout& layou
 
 void ReHarmonizerAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
-    juce::ignoreUnused(midiMessages);
-    
-//    auto totalNumInputChannels{ getTotalNumInputChannels() };
-//    auto totalNumOutputChannels{ getTotalNumOutputChannels() };
+    juce::ignoreUnused (midiMessages);
+    juce::ScopedNoDenormals noDenormals;
+    auto totalNumInputChannels  = getTotalNumInputChannels();
+
+    for (int sample = 0; sample < buffer.getNumSamples(); ++sample)
+    {
+
+        float monoSample = 0.0f;
+        for (int channel = 0; channel < totalNumInputChannels; ++channel) {
+            monoSample += buffer.getReadPointer(channel)[sample];
+        }   //sumowanie probek ze wszystkich dostepnych kanałów
+        monoSample /= static_cast<float>(totalNumInputChannels); //wyliczanie średniej-> zeby nie było przesteru
+        freqDetector.processSample (monoSample);
+        dominantFrequency.store (freqDetector.getFrequency());
+    }
+
+    //    auto totalNumOutputChannels{ getTotalNumOutputChannels() };
 }
 
 //==============================================================================
@@ -117,7 +132,7 @@ void ReHarmonizerAudioProcessor::setStateInformation(const void* data, int sizeI
 }
 
 //==============================================================================
-// Creates new instances of the plugin
+//Stworzenie instancji wtyczki
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {
     return new ReHarmonizerAudioProcessor();
