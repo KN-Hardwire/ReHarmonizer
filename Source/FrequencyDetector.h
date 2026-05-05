@@ -1,4 +1,5 @@
 #pragma once
+
 #include <juce_core/juce_core.h>
 #include <juce_dsp/juce_dsp.h>
 #include <array>
@@ -23,9 +24,9 @@ private:
     std::array<float, fftSize> fifo { 0.0f };
     std::array<float, fftSize * 2> fftData { 0.0f };
 
-    int fifoIndex = 0;
-    float currentSampleRate = 44100.0f;
-    float lastCalculatedFrequency = 0.0f;
+    int fifoIndex { 0 };
+    float currentSampleRate { 44100.0f };
+    float lastCalculatedFrequency { 0.0f };
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FrequencyDetector)
 };

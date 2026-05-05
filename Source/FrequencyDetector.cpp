@@ -8,7 +8,7 @@ FrequencyDetector::FrequencyDetector()
 
 void FrequencyDetector::prepare (double sampleRate)
 {
-    currentSampleRate = static_cast<float> (sampleRate);
+    currentSampleRate = static_cast<float>(sampleRate);
     fifoIndex = 0;
     lastCalculatedFrequency = 0.0f;
 }
@@ -17,17 +17,20 @@ void FrequencyDetector::processSample (float sample)
 {
     if (fifoIndex == fftSize)
     {
-        std::copy (fifo.begin(), fifo.end(), fftData.begin());              //skopiowanie fifo do fftdata
-        std::fill (fftData.begin() + collectionSize, fftData.end(), 0.0f);   //Wypelnienie drugiej połowy fftdata zerami
+        // Skopiowanie fifo do fftdata
+        std::copy (fifo.begin(), fifo.end(), fftData.begin());
+        // Wypelnienie drugiej połowy fftdata zerami
+        std::fill (fftData.begin() + collectionSize, fftData.end(), 0.0f);
 
-        window.multiplyWithWindowingTable (fftData.data(), collectionSize); //okienkowanie fftdata
-        forwardFFT.performFrequencyOnlyForwardTransform (fftData.data());          //FFT
+        window.multiplyWithWindowingTable (fftData.data(), collectionSize); // Okienkowanie fftdata
+        forwardFFT.performFrequencyOnlyForwardTransform (fftData.data());   // FFT
 
-        float maxMagnitude = 0.0f;
-        int maxBin = 0;
+        float maxMagnitude { 0.0f };
+        int maxBin { 0 };
 
-        for (std::size_t i = 1; i < static_cast<std::size_t>(fftSize) / 2 - 1; ++i) // Wyszukiwanie gdzie jest najwieksza amplituda
+        for (std::size_t i = 1; i < static_cast<std::size_t>(fftSize) / 2 - 1; ++i)
         {
+            // Wyszukiwanie gdzie jest najwieksza amplituda
             if (fftData[i] > maxMagnitude)
             {
                 maxMagnitude = fftData[i];
