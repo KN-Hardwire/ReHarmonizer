@@ -23,15 +23,20 @@ juce_add_plugin(PluginProject
 	NEEDS_MIDI_OUTPUT FALSE
 	IS_MIDI_EFFECT FALSE
 )
+juce_generate_juce_header(PluginProject)
 
 # ==========================================
 # Source files
 # ==========================================
 target_sources(PluginProject
 	PRIVATE
-	Source/PluginSetupTest.cpp
-	# If your contribution adds a new source file, add it above this line 
+    Source/PluginProcessor.cpp
+    Source/PluginProcessor.h
+    Source/PluginEditor.cpp
+    Source/PluginEditor.h
 )
+	# If your contribution adds a new source file, add it above this line 
+
 
 # ==========================================
 # Compile definitions
