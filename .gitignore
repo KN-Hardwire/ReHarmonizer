@@ -1,6 +1,7 @@
 build/
 .vs/
 .vscode/settings.json
+.idea/
 
 .DS_Store
 *.xcodeproj/

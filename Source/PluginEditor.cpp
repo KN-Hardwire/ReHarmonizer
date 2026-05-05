@@ -1,18 +1,35 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
-ReHarmonizerAudioProcessorEditor::ReHarmonizerAudioProcessorEditor (ReHarmonizerAudioProcessor& p)
-    : AudioProcessorEditor (&p), audioProcessor (p)
+namespace EditorConstants
 {
-    
+    constexpr int windowWidth{ 600 };
+    constexpr int windowHeight{ 400 };
+}
+
+ReHarmonizerAudioProcessorEditor::ReHarmonizerAudioProcessorEditor(ReHarmonizerAudioProcessor& p)
+    : AudioProcessorEditor(&p), audioProcessor(p)
+{
+    setSize(EditorConstants::windowWidth, EditorConstants::windowHeight);
+
+    // Kod kolegi: Inicjalizacja etykiety częstotliwości i timera
+    frequencyLabel.setText("Oczekiwanie na sygnał...", juce::dontSendNotification);
+    frequencyLabel.setJustificationType(juce::Justification::centred);
+    frequencyLabel.setFont(juce::Font(30.0f, juce::Font::bold));
+    frequencyLabel.setColour(juce::Label::textColourId, juce::Colours::white);
+    addAndMakeVisible(frequencyLabel);
+
+    startTimerHz(30);
+
+    // Twój kod: Inicjalizacja komponentów z taska #7
     blendKnob.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
-    blendKnob.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 60, 20); 
-    blendKnob.setRange(0.0, 1.0, 0.01); 
-    blendKnob.setValue(0.5); 
+    blendKnob.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 60, 20);
+    blendKnob.setRange(0.0, 1.0, 0.01);
+    blendKnob.setValue(0.5);
     addAndMakeVisible(blendKnob);
 
     blendLabel.setText("Blend", juce::dontSendNotification);
-    blendLabel.setJustificationType(juce::Justification::centred); 
+    blendLabel.setJustificationType(juce::Justification::centred);
     blendLabel.attachToComponent(&blendKnob, false);
     addAndMakeVisible(blendLabel);
 
@@ -27,7 +44,6 @@ ReHarmonizerAudioProcessorEditor::ReHarmonizerAudioProcessorEditor (ReHarmonizer
     pitchCorrectLabel.attachToComponent(&pitchCorrectKnob, false);
     addAndMakeVisible(pitchCorrectLabel);
 
-    
     gainKnob.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
     gainKnob.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 60, 20);
     gainKnob.setRange(-24.0, 24.0, 0.1);
@@ -39,7 +55,6 @@ ReHarmonizerAudioProcessorEditor::ReHarmonizerAudioProcessorEditor (ReHarmonizer
     gainLabel.attachToComponent(&gainKnob, false);
     addAndMakeVisible(gainLabel);
 
-    
     waveformSelector.addItem("Sine", 1);
     waveformSelector.addItem("Square", 2);
     waveformSelector.addItem("Sawtooth", 3);
@@ -50,20 +65,26 @@ ReHarmonizerAudioProcessorEditor::ReHarmonizerAudioProcessorEditor (ReHarmonizer
     waveformLabel.setText("Waveform", juce::dontSendNotification);
     waveformLabel.attachToComponent(&waveformSelector, false);
     addAndMakeVisible(waveformLabel);
-
-    setSize (500, 300);
 }
 
-ReHarmonizerAudioProcessorEditor::~ReHarmonizerAudioProcessorEditor() {}
-
-void ReHarmonizerAudioProcessorEditor::paint (juce::Graphics& g)
+ReHarmonizerAudioProcessorEditor::~ReHarmonizerAudioProcessorEditor()
 {
-    g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
+    stopTimer();
+}
+
+void ReHarmonizerAudioProcessorEditor::paint(juce::Graphics& g)
+{
+    g.fillAll(juce::Colours::darkgrey); // Zdecydowałem się na kolor od kolegi (dev)
 }
 
 void ReHarmonizerAudioProcessorEditor::resized()
 {
     auto area = getLocalBounds();
+    
+    // Ustawiamy etykietę częstotliwości (kod kolegi) u góry ekranu
+    frequencyLabel.setBounds(area.removeFromTop(100).withSizeKeepingCentre(300, 50));
+
+    // Marginesy dla dolnej sekcji (Twój kod)
     area.reduce(20, 40);
 
     int knobSize = 100;
@@ -74,4 +95,11 @@ void ReHarmonizerAudioProcessorEditor::resized()
     gainKnob.setBounds(pitchCorrectKnob.getRight() + spacing, area.getY(), knobSize, knobSize);
 
     waveformSelector.setBounds(area.getX(), blendKnob.getBottom() + 40, 150, 30);
+}
+
+void ReHarmonizerAudioProcessorEditor::timerCallback()
+{
+    float currentFreq = audioProcessor.getDominantFrequency();
+    juce::String freqText = juce::String(currentFreq, 1) + " Hz";
+    frequencyLabel.setText(freqText, juce::dontSendNotification);
 }
