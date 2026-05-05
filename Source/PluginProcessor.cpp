@@ -96,8 +96,8 @@ void ReHarmonizerAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, 
         float monoSample = 0.0f;
         for (int channel = 0; channel < totalNumInputChannels; ++channel) {
             monoSample += buffer.getReadPointer(channel)[sample];
-        }   //sumowanie probek ze wszystkich dostepnych kanałów
-        monoSample /= static_cast<float>(totalNumInputChannels); //wyliczanie średniej-> zeby nie było przesteru
+        }   
+        monoSample /= static_cast<float>(totalNumInputChannels); 
         freqDetector.processSample (monoSample);
         dominantFrequency.store (freqDetector.getFrequency());
     }
@@ -126,7 +126,6 @@ void ReHarmonizerAudioProcessor::setStateInformation(const void* data, int sizeI
 }
 
 //==============================================================================
-//Stworzenie instancji wtyczki
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {
     return new ReHarmonizerAudioProcessor();

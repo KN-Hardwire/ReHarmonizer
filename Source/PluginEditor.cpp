@@ -12,7 +12,7 @@ ReHarmonizerAudioProcessorEditor::ReHarmonizerAudioProcessorEditor(ReHarmonizerA
 {
     setSize(EditorConstants::windowWidth, EditorConstants::windowHeight);
 
-    // Kod kolegi: Inicjalizacja etykiety częstotliwości i timera
+   
     frequencyLabel.setText("Oczekiwanie na sygnał...", juce::dontSendNotification);
     frequencyLabel.setJustificationType(juce::Justification::centred);
     frequencyLabel.setFont(juce::Font(30.0f, juce::Font::bold));
@@ -74,17 +74,17 @@ ReHarmonizerAudioProcessorEditor::~ReHarmonizerAudioProcessorEditor()
 
 void ReHarmonizerAudioProcessorEditor::paint(juce::Graphics& g)
 {
-    g.fillAll(juce::Colours::darkgrey); // Zdecydowałem się na kolor od kolegi (dev)
+    g.fillAll(juce::Colours::darkgrey); 
 }
 
 void ReHarmonizerAudioProcessorEditor::resized()
 {
     auto area = getLocalBounds();
     
-    // Ustawiamy etykietę częstotliwości (kod kolegi) u góry ekranu
+   
     frequencyLabel.setBounds(area.removeFromTop(100).withSizeKeepingCentre(300, 50));
 
-    // Marginesy dla dolnej sekcji (Twój kod)
+    
     area.reduce(20, 40);
 
     int knobSize = 100;
