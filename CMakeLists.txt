@@ -12,9 +12,9 @@ add_subdirectory(third_party/JUCE)
 # AU is only supported on macOS
 # ==========================================
 if(APPLE)
-    set(PLUGIN_FORMATS AU VST3)
+	set(PLUGIN_FORMATS AU VST3 Standalone)
 else()
-    set(PLUGIN_FORMATS VST3)
+	set(PLUGIN_FORMATS VST3 Standalone)
 endif()
 
 # ==========================================
