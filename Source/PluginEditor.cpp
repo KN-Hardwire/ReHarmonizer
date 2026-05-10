@@ -11,7 +11,7 @@ ReHarmonizerAudioProcessorEditor::ReHarmonizerAudioProcessorEditor(ReHarmonizerA
 {
     setSize(EditorConstants::windowWidth, EditorConstants::windowHeight);
 
-    frequencyLabel.setText ("Oczekiwanie na sygnał...", juce::dontSendNotification);
+    frequencyLabel.setText ("Waiting for signal...", juce::dontSendNotification);
     frequencyLabel.setJustificationType (juce::Justification::centred);
     frequencyLabel.setFont (juce::Font (30.0f, juce::Font::bold));
     frequencyLabel.setColour (juce::Label::textColourId, juce::Colours::white);

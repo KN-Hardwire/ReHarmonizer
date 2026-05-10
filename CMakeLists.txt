@@ -45,6 +45,8 @@ target_sources(ReHarmonizer
 	Source/PluginEditor.cpp
 	Source/FrequencyDetector.h
 	Source/FrequencyDetector.cpp
+	Source/Oscillator.h
+	Source/Oscillator.cpp
 	# If your contribution adds a new source file, add it above this line 
 )
 

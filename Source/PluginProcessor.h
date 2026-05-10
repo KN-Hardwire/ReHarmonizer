@@ -3,6 +3,7 @@
 #include <juce_audio_processors/juce_audio_processors.h>
 #include <juce_dsp/juce_dsp.h>
 #include "FrequencyDetector.h"
+#include "Oscillator.h"
 
 class ReHarmonizerAudioProcessor : public juce::AudioProcessor
 {
@@ -39,9 +40,9 @@ public:
 	float getDominantFrequency() const {return dominantFrequency.load();}
 
 private:
-
 	FrequencyDetector freqDetector;
 	std::atomic<float> dominantFrequency { 0.0f };
+	Oscillator oscillator;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ReHarmonizerAudioProcessor)
 };
