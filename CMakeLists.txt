@@ -34,9 +34,6 @@ juce_add_plugin(ReHarmonizer
     IS_MIDI_EFFECT FALSE
 )
 
-# Poprawiona nazwa targetu
-juce_generate_juce_header(ReHarmonizer)
-
 # ==========================================
 # Source files
 # ==========================================
