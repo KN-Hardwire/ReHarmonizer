@@ -16,14 +16,12 @@ ReHarmonizerAudioProcessorEditor::ReHarmonizerAudioProcessorEditor(ReHarmonizerA
     frequencyLabel.setJustificationType (juce::Justification::centred);
     frequencyLabel.setFont (juce::Font (30.0f, juce::Font::bold));
     frequencyLabel.setColour (juce::Label::textColourId, juce::Colours::white);
+    addAndMakeVisible(frequencyLabel);
 
     startTimerHz(30);
 
-    // Twój kod: Inicjalizacja komponentów z taska #7
     blendKnob.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
     blendKnob.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 60, 20);
-    blendKnob.setRange(0.0, 1.0, 0.01);
-    blendKnob.setValue(0.5);
     addAndMakeVisible(blendKnob);
 
     blendLabel.setText("Blend", juce::dontSendNotification);
@@ -33,8 +31,6 @@ ReHarmonizerAudioProcessorEditor::ReHarmonizerAudioProcessorEditor(ReHarmonizerA
 
     pitchCorrectKnob.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
     pitchCorrectKnob.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 60, 20);
-    pitchCorrectKnob.setRange(-12.0, 12.0, 0.1);
-    pitchCorrectKnob.setValue(0.0);
     addAndMakeVisible(pitchCorrectKnob);
 
     pitchCorrectLabel.setText("Pitch", juce::dontSendNotification);
@@ -44,8 +40,6 @@ ReHarmonizerAudioProcessorEditor::ReHarmonizerAudioProcessorEditor(ReHarmonizerA
 
     gainKnob.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
     gainKnob.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 60, 20);
-    gainKnob.setRange(-24.0, 24.0, 0.1);
-    gainKnob.setValue(0.0);
     addAndMakeVisible(gainKnob);
 
     gainLabel.setText("Gain", juce::dontSendNotification);
@@ -57,12 +51,24 @@ ReHarmonizerAudioProcessorEditor::ReHarmonizerAudioProcessorEditor(ReHarmonizerA
     waveformSelector.addItem("Square", 2);
     waveformSelector.addItem("Sawtooth", 3);
     waveformSelector.addItem("Triangle", 4);
-    waveformSelector.setSelectedId(1);
     addAndMakeVisible(waveformSelector);
 
     waveformLabel.setText("Waveform", juce::dontSendNotification);
     waveformLabel.attachToComponent(&waveformSelector, false);
     addAndMakeVisible(waveformLabel);
+
+    blendAttachment = std::make_unique<SliderAttachment> (audioProcessor.apvts,
+                                                         ReHarmonizerAudioProcessor::paramBlend,
+                                                         blendKnob);
+    pitchCorrectAttachment = std::make_unique<SliderAttachment> (audioProcessor.apvts,
+                                                                ReHarmonizerAudioProcessor::paramPitchCorrect,
+                                                                pitchCorrectKnob);
+    gainAttachment = std::make_unique<SliderAttachment> (audioProcessor.apvts,
+                                                        ReHarmonizerAudioProcessor::paramGainDb,
+                                                        gainKnob);
+    waveformAttachment = std::make_unique<ComboBoxAttachment> (audioProcessor.apvts,
+                                                              ReHarmonizerAudioProcessor::paramWaveform,
+                                                              waveformSelector);
 }
 
 ReHarmonizerAudioProcessorEditor::~ReHarmonizerAudioProcessorEditor()
