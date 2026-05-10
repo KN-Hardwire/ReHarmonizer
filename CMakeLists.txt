@@ -12,9 +12,9 @@ add_subdirectory(third_party/JUCE)
 # AU is only supported on macOS
 # ==========================================
 if(APPLE)
-    set(PLUGIN_FORMATS AU VST3)
+	set(PLUGIN_FORMATS AU VST3 Standalone)
 else()
-    set(PLUGIN_FORMATS VST3)
+	set(PLUGIN_FORMATS VST3 Standalone)
 endif()
 
 # ==========================================
@@ -41,14 +41,16 @@ juce_generate_juce_header(ReHarmonizer)
 # Source files
 # ==========================================
 target_sources(ReHarmonizer
-    PRIVATE
-    Source/PluginProcessor.h
-    Source/PluginProcessor.cpp
-    Source/PluginEditor.h
-    Source/PluginEditor.cpp
-    Source/FrequencyDetector.h
-    Source/FrequencyDetector.cpp
-    # If your contribution adds a new source file, add it above this line 
+	PRIVATE
+	Source/PluginProcessor.h
+	Source/PluginProcessor.cpp
+	Source/PluginEditor.h
+	Source/PluginEditor.cpp
+	Source/FrequencyDetector.h
+	Source/FrequencyDetector.cpp
+	Source/Oscillator.h
+	Source/Oscillator.cpp
+	# If your contribution adds a new source file, add it above this line 
 )
 
 # ==========================================

@@ -1,5 +1,6 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
+#include <cmath>
 
 ReHarmonizerAudioProcessor::ReHarmonizerAudioProcessor()
 {
@@ -68,6 +69,8 @@ void ReHarmonizerAudioProcessor::prepareToPlay(double sampleRate, int samplesPer
 {
     juce::ignoreUnused (samplesPerBlock);
     freqDetector.prepare (sampleRate);
+    oscillator.setSampleRate (sampleRate);
+    oscillator.reset();
 }
 
 void ReHarmonizerAudioProcessor::releaseResources()
@@ -77,8 +80,10 @@ void ReHarmonizerAudioProcessor::releaseResources()
 
 bool ReHarmonizerAudioProcessor::isBusesLayoutSupported(const BusesLayout& layouts) const
 {
+    // Reject layout with no input - need at least a mono input
     if (layouts.getMainInputChannelSet() == juce::AudioChannelSet::disabled())
         return false;
+    // Output layout must match input layout
     if (layouts.getMainInputChannelSet() != layouts.getMainOutputChannelSet())
         return false;
     
@@ -96,10 +101,24 @@ void ReHarmonizerAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, 
         float monoSample = 0.0f;
         for (int channel = 0; channel < totalNumInputChannels; ++channel) {
             monoSample += buffer.getReadPointer(channel)[sample];
-        }   
-        monoSample /= static_cast<float>(totalNumInputChannels); 
+        }   // Summing samples from all channels
+        monoSample /= static_cast<float>(totalNumInputChannels); // Calculate average to remove distortion
         freqDetector.processSample (monoSample);
         dominantFrequency.store (freqDetector.getFrequency());
+    }
+
+    const auto detectedHz = dominantFrequency.load();
+    const bool detectedHzValid = std::isfinite(detectedHz) && detectedHz >= 20.0f && detectedHz <= 20000.0f;
+    if (detectedHzValid)
+        oscillator.setFrequency (detectedHz);
+
+    constexpr float oscGain = 0.15f;
+    for (int sample = 0; sample < buffer.getNumSamples(); ++sample)
+    {
+        const float oscSample = detectedHzValid ? (oscillator.processSample() * oscGain) : 0.0f;
+
+        for (int channel = 0; channel < buffer.getNumChannels(); ++channel)
+            buffer.getWritePointer(channel)[sample] += oscSample;
     }
 }
 
@@ -126,6 +145,7 @@ void ReHarmonizerAudioProcessor::setStateInformation(const void* data, int sizeI
 }
 
 //==============================================================================
+// Creates new instances of the plugin
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {
     return new ReHarmonizerAudioProcessor();

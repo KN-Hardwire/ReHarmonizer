@@ -12,12 +12,10 @@ ReHarmonizerAudioProcessorEditor::ReHarmonizerAudioProcessorEditor(ReHarmonizerA
 {
     setSize(EditorConstants::windowWidth, EditorConstants::windowHeight);
 
-   
-    frequencyLabel.setText("Oczekiwanie na sygnał...", juce::dontSendNotification);
-    frequencyLabel.setJustificationType(juce::Justification::centred);
-    frequencyLabel.setFont(juce::Font(30.0f, juce::Font::bold));
-    frequencyLabel.setColour(juce::Label::textColourId, juce::Colours::white);
-    addAndMakeVisible(frequencyLabel);
+    frequencyLabel.setText ("Waiting for signal...", juce::dontSendNotification);
+    frequencyLabel.setJustificationType (juce::Justification::centred);
+    frequencyLabel.setFont (juce::Font (30.0f, juce::Font::bold));
+    frequencyLabel.setColour (juce::Label::textColourId, juce::Colours::white);
 
     startTimerHz(30);
 
@@ -100,6 +98,8 @@ void ReHarmonizerAudioProcessorEditor::resized()
 void ReHarmonizerAudioProcessorEditor::timerCallback()
 {
     float currentFreq = audioProcessor.getDominantFrequency();
-    juce::String freqText = juce::String(currentFreq, 1) + " Hz";
-    frequencyLabel.setText(freqText, juce::dontSendNotification);
+
+    juce::String freqText = juce::String (currentFreq, 1) + " Hz";
+
+    frequencyLabel.setText (freqText, juce::dontSendNotification);
 }

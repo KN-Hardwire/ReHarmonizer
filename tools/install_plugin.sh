@@ -11,7 +11,7 @@ if [[ "$(uname)" != "Darwin" ]]; then
     exit 1
 fi
 
-BUILD_DIR="$(dirname "$0")/../build/ReHarmonizer_artefacts/Debug"
+BUILD_DIR="$(dirname "$0")/../build/ReHarmonizer_artefacts"
 VST3_SRC="$BUILD_DIR/VST3/ReHarmonizer.vst3"
 AU_SRC="$BUILD_DIR/AU/ReHarmonizer.component"
 
