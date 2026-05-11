@@ -53,12 +53,20 @@ target_sources(ReHarmonizer
 # ==========================================
 # Compile options
 # ==========================================
-target_compile_options(ReHarmonizer
-    PRIVATE
-    -Wall
-    -Wextra
-    -Wpedantic
-)
+if (MSVC) # Windows compile options
+    target_compile_options(ReHarmonizer
+        PRIVATE
+        /W4
+        /permissive-
+    )
+else() # GCC/Clang style flags
+    target_compile_options(ReHarmonizer
+        PRIVATE
+        -Wall
+        -Wextra
+        -Wpedantic
+    )
+endif()
 
 # ==========================================
 # Compile definitions
