@@ -2,6 +2,39 @@
 #include "PluginEditor.h"
 #include <cmath>
 
+juce::AudioProcessorValueTreeState::ParameterLayout ReHarmonizerAudioProcessor::createParameterLayout()
+{
+    juce::AudioProcessorValueTreeState::ParameterLayout layout;
+
+    layout.add (std::make_unique<juce::AudioParameterFloat> (
+        juce::ParameterID (paramBlend, 1),
+        "Blend",
+        juce::NormalisableRange<float> (0.0f, 1.0f, 0.001f),
+        0.0f));
+
+    layout.add (std::make_unique<juce::AudioParameterFloat> (
+        juce::ParameterID (paramPitchCorrect, 1),
+        "Pitch",
+        juce::NormalisableRange<float> (-12.0f, 12.0f, 0.1f),
+        0.0f,
+        "st"));
+
+    layout.add (std::make_unique<juce::AudioParameterFloat> (
+        juce::ParameterID (paramGainDb, 1),
+        "Gain",
+        juce::NormalisableRange<float> (-60.0f, 3.0f, 0.1f),
+        0.0f,
+        "dB"));
+
+    layout.add (std::make_unique<juce::AudioParameterChoice> (
+        juce::ParameterID (paramWaveform, 1),
+        "Waveform",
+        juce::StringArray { "Sine", "Square", "Sawtooth", "Triangle" },
+        0));
+
+    return layout;
+}
+
 ReHarmonizerAudioProcessor::ReHarmonizerAudioProcessor()
 {
 
@@ -68,7 +101,6 @@ void ReHarmonizerAudioProcessor::changeProgramName(int index, const juce::String
 void ReHarmonizerAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 {
     juce::ignoreUnused (samplesPerBlock);
-
     freqDetector.prepare (sampleRate);
     oscillator.setSampleRate (sampleRate);
     oscillator.reset();
@@ -99,7 +131,6 @@ void ReHarmonizerAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, 
 
     for (int sample = 0; sample < buffer.getNumSamples(); ++sample)
     {
-
         float monoSample = 0.0f;
         for (int channel = 0; channel < totalNumInputChannels; ++channel) {
             monoSample += buffer.getReadPointer(channel)[sample];
@@ -111,16 +142,34 @@ void ReHarmonizerAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, 
 
     const auto detectedHz = dominantFrequency.load();
     const bool detectedHzValid = std::isfinite(detectedHz) && detectedHz >= 20.0f && detectedHz <= 20000.0f;
-    if (detectedHzValid)
-        oscillator.setFrequency (detectedHz);
+    if (! detectedHzValid)
+        return;
 
-    constexpr float oscGain = 0.15f;
+    const float blend = juce::jlimit (0.0f, 1.0f, apvts.getRawParameterValue (paramBlend)->load());
+    const float pitchCorrectSemis = apvts.getRawParameterValue (paramPitchCorrect)->load();
+    const float gainDb = apvts.getRawParameterValue (paramGainDb)->load();
+    const int waveformIndex = static_cast<int> (apvts.getRawParameterValue (paramWaveform)->load());
+
+    oscillator.setWaveform (static_cast<Oscillator::Waveform> (juce::jlimit (0, 3, waveformIndex)));
+
+    const float pitchRatio = std::pow (2.0f, pitchCorrectSemis / 12.0f);
+    oscillator.setFrequency (detectedHz * pitchRatio);
+
+    const float oscGain = juce::Decibels::decibelsToGain (gainDb);
+    const float dryMix = 1.0f - blend;
+
+    const int numChannels = buffer.getNumChannels();
+    juce::HeapBlock<float*> channelWritePtrs;
+    channelWritePtrs.allocate (static_cast<size_t> (numChannels), true);
+    for (int channel = 0; channel < numChannels; ++channel)
+        channelWritePtrs[channel] = buffer.getWritePointer (channel);
+
     for (int sample = 0; sample < buffer.getNumSamples(); ++sample)
     {
-        const float oscSample = detectedHzValid ? (oscillator.processSample() * oscGain) : 0.0f;
+        const float oscSample = oscillator.processSample() * oscGain;
 
-        for (int channel = 0; channel < buffer.getNumChannels(); ++channel)
-            buffer.getWritePointer(channel)[sample] += oscSample;
+        for (int channel = 0; channel < numChannels; ++channel)
+            channelWritePtrs[channel][sample] = channelWritePtrs[channel][sample] * dryMix + oscSample * blend;
     }
 }
 
@@ -138,12 +187,15 @@ juce::AudioProcessorEditor* ReHarmonizerAudioProcessor::createEditor()
 //==============================================================================
 void ReHarmonizerAudioProcessor::getStateInformation(juce::MemoryBlock& destData)
 {
-    juce::ignoreUnused(destData);
+    auto state = apvts.copyState();
+    if (auto xml = state.createXml())
+        copyXmlToBinary (*xml, destData);
 }
 
 void ReHarmonizerAudioProcessor::setStateInformation(const void* data, int sizeInBytes)
 {
-    juce::ignoreUnused(data, sizeInBytes);
+    if (auto xmlState = getXmlFromBinary (data, sizeInBytes))
+        apvts.replaceState (juce::ValueTree::fromXml (*xmlState));
 }
 
 //==============================================================================

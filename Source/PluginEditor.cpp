@@ -1,3 +1,4 @@
+#include "PluginProcessor.h"
 #include "PluginEditor.h"
 
 namespace EditorConstants
@@ -15,10 +16,59 @@ ReHarmonizerAudioProcessorEditor::ReHarmonizerAudioProcessorEditor(ReHarmonizerA
     frequencyLabel.setJustificationType (juce::Justification::centred);
     frequencyLabel.setFont (juce::Font (30.0f, juce::Font::bold));
     frequencyLabel.setColour (juce::Label::textColourId, juce::Colours::white);
+    addAndMakeVisible(frequencyLabel);
 
-    addAndMakeVisible (frequencyLabel);
+    startTimerHz(30);
 
-    startTimerHz (30);
+    blendKnob.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
+    blendKnob.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 60, 20);
+    addAndMakeVisible(blendKnob);
+
+    blendLabel.setText("Blend", juce::dontSendNotification);
+    blendLabel.setJustificationType(juce::Justification::centred);
+    blendLabel.attachToComponent(&blendKnob, false);
+    addAndMakeVisible(blendLabel);
+
+    pitchCorrectKnob.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
+    pitchCorrectKnob.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 60, 20);
+    addAndMakeVisible(pitchCorrectKnob);
+
+    pitchCorrectLabel.setText("Pitch", juce::dontSendNotification);
+    pitchCorrectLabel.setJustificationType(juce::Justification::centred);
+    pitchCorrectLabel.attachToComponent(&pitchCorrectKnob, false);
+    addAndMakeVisible(pitchCorrectLabel);
+
+    gainKnob.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
+    gainKnob.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 60, 20);
+    addAndMakeVisible(gainKnob);
+
+    gainLabel.setText("Gain", juce::dontSendNotification);
+    gainLabel.setJustificationType(juce::Justification::centred);
+    gainLabel.attachToComponent(&gainKnob, false);
+    addAndMakeVisible(gainLabel);
+
+    waveformSelector.addItem("Sine", 1);
+    waveformSelector.addItem("Square", 2);
+    waveformSelector.addItem("Sawtooth", 3);
+    waveformSelector.addItem("Triangle", 4);
+    addAndMakeVisible(waveformSelector);
+
+    waveformLabel.setText("Waveform", juce::dontSendNotification);
+    waveformLabel.attachToComponent(&waveformSelector, false);
+    addAndMakeVisible(waveformLabel);
+
+    blendAttachment = std::make_unique<SliderAttachment> (audioProcessor.apvts,
+                                                         ReHarmonizerAudioProcessor::paramBlend,
+                                                         blendKnob);
+    pitchCorrectAttachment = std::make_unique<SliderAttachment> (audioProcessor.apvts,
+                                                                ReHarmonizerAudioProcessor::paramPitchCorrect,
+                                                                pitchCorrectKnob);
+    gainAttachment = std::make_unique<SliderAttachment> (audioProcessor.apvts,
+                                                        ReHarmonizerAudioProcessor::paramGainDb,
+                                                        gainKnob);
+    waveformAttachment = std::make_unique<ComboBoxAttachment> (audioProcessor.apvts,
+                                                              ReHarmonizerAudioProcessor::paramWaveform,
+                                                              waveformSelector);
 }
 
 ReHarmonizerAudioProcessorEditor::~ReHarmonizerAudioProcessorEditor()
@@ -28,12 +78,27 @@ ReHarmonizerAudioProcessorEditor::~ReHarmonizerAudioProcessorEditor()
 
 void ReHarmonizerAudioProcessorEditor::paint(juce::Graphics& g)
 {
-    g.fillAll (juce::Colours::darkgrey);
+    g.fillAll(juce::Colours::darkgrey); 
 }
 
 void ReHarmonizerAudioProcessorEditor::resized()
 {
-    frequencyLabel.setBounds (getLocalBounds().withSizeKeepingCentre (300, 50));
+    auto area = getLocalBounds();
+    
+   
+    frequencyLabel.setBounds(area.removeFromTop(100).withSizeKeepingCentre(300, 50));
+
+    
+    area.reduce(20, 40);
+
+    int knobSize = 100;
+    int spacing = 20;
+
+    blendKnob.setBounds(area.getX(), area.getY(), knobSize, knobSize);
+    pitchCorrectKnob.setBounds(blendKnob.getRight() + spacing, area.getY(), knobSize, knobSize);
+    gainKnob.setBounds(pitchCorrectKnob.getRight() + spacing, area.getY(), knobSize, knobSize);
+
+    waveformSelector.setBounds(area.getX(), blendKnob.getBottom() + 40, 150, 30);
 }
 
 void ReHarmonizerAudioProcessorEditor::timerCallback()
