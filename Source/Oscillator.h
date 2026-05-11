@@ -3,7 +3,6 @@
 #include <juce_core/juce_core.h>
 #include <cmath>
 
-//==============================================================================
 /**
  * A multi-waveform oscillator supporting sine, square, sawtooth, and triangle.
  *
@@ -15,7 +14,6 @@
  */
 class Oscillator {
 public:
-    //==========================================================================
     enum class Waveform {
         Sine, Square, Saw, Triangle
     };
@@ -46,7 +44,6 @@ public:
     float processSample() noexcept;
 
 private:
-    //==========================================================================
     float  frequency{440.0f};
     double sampleRate{44100.0};
     float  phase{0.0f};

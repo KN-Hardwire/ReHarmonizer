@@ -46,14 +46,14 @@ public:
     static constexpr const char* paramWaveform = "waveform";
 
 	static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
-    juce::AudioProcessorValueTreeState apvts { *this,
-											   nullptr,
-											   "Parameters",
-											   createParameterLayout() };
+    juce::AudioProcessorValueTreeState apvts{ *this,
+                                              nullptr,
+                                              "Parameters",
+                                              createParameterLayout() };
 
 private:
 	FrequencyDetector freqDetector;
-	std::atomic<float> dominantFrequency { 0.0f };
+	std::atomic<float> dominantFrequency{ 0.0f };
 	Oscillator oscillator;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ReHarmonizerAudioProcessor)

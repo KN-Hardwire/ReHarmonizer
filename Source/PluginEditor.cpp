@@ -12,10 +12,10 @@ ReHarmonizerAudioProcessorEditor::ReHarmonizerAudioProcessorEditor(ReHarmonizerA
 {
     setSize(EditorConstants::windowWidth, EditorConstants::windowHeight);
 
-    frequencyLabel.setText ("Waiting for signal...", juce::dontSendNotification);
+    frequencyLabel.setText("Waiting for signal...", juce::dontSendNotification);
     frequencyLabel.setJustificationType (juce::Justification::centred);
-    frequencyLabel.setFont (juce::Font (30.0f, juce::Font::bold));
-    frequencyLabel.setColour (juce::Label::textColourId, juce::Colours::white);
+    frequencyLabel.setFont(juce::Font(juce::FontOptions(30.0f, juce::Font::bold)));
+    frequencyLabel.setColour(juce::Label::textColourId, juce::Colours::white);
     addAndMakeVisible(frequencyLabel);
 
     startTimerHz(30);
@@ -57,16 +57,16 @@ ReHarmonizerAudioProcessorEditor::ReHarmonizerAudioProcessorEditor(ReHarmonizerA
     waveformLabel.attachToComponent(&waveformSelector, false);
     addAndMakeVisible(waveformLabel);
 
-    blendAttachment = std::make_unique<SliderAttachment> (audioProcessor.apvts,
+    blendAttachment = std::make_unique<SliderAttachment>(audioProcessor.apvts,
                                                          ReHarmonizerAudioProcessor::paramBlend,
                                                          blendKnob);
-    pitchCorrectAttachment = std::make_unique<SliderAttachment> (audioProcessor.apvts,
+    pitchCorrectAttachment = std::make_unique<SliderAttachment>(audioProcessor.apvts,
                                                                 ReHarmonizerAudioProcessor::paramPitchCorrect,
                                                                 pitchCorrectKnob);
-    gainAttachment = std::make_unique<SliderAttachment> (audioProcessor.apvts,
+    gainAttachment = std::make_unique<SliderAttachment>(audioProcessor.apvts,
                                                         ReHarmonizerAudioProcessor::paramGainDb,
                                                         gainKnob);
-    waveformAttachment = std::make_unique<ComboBoxAttachment> (audioProcessor.apvts,
+    waveformAttachment = std::make_unique<ComboBoxAttachment>(audioProcessor.apvts,
                                                               ReHarmonizerAudioProcessor::paramWaveform,
                                                               waveformSelector);
 }
@@ -85,9 +85,7 @@ void ReHarmonizerAudioProcessorEditor::resized()
 {
     auto area = getLocalBounds();
     
-   
     frequencyLabel.setBounds(area.removeFromTop(100).withSizeKeepingCentre(300, 50));
-
     
     area.reduce(20, 40);
 
@@ -105,7 +103,7 @@ void ReHarmonizerAudioProcessorEditor::timerCallback()
 {
     float currentFreq = audioProcessor.getDominantFrequency();
 
-    juce::String freqText = juce::String (currentFreq, 1) + " Hz";
+    juce::String freqText = juce::String(currentFreq, 1) + " Hz";
 
-    frequencyLabel.setText (freqText, juce::dontSendNotification);
+    frequencyLabel.setText(freqText, juce::dontSendNotification);
 }

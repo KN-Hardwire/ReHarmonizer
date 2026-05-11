@@ -9,14 +9,14 @@ class FrequencyDetector
 public:
     FrequencyDetector();
 
-    void prepare (double sampleRate);
-    void processSample (float sample);
+    void prepare(double sampleRate);
+    void processSample(float sample);
     float getFrequency() const;
 
 private:
-    static constexpr auto collectionSize = 2048;
-    static constexpr auto fftOrder = 12;
-    static constexpr auto fftSize  = 1 << fftOrder;
+    static constexpr std::size_t collectionSize = 2048;
+    static constexpr std::size_t fftOrder = 12;
+    static constexpr std::size_t fftSize  = 1 << fftOrder;
 
     juce::dsp::FFT forwardFFT;
     juce::dsp::WindowingFunction<float> window;
@@ -24,7 +24,7 @@ private:
     std::array<float, fftSize> fifo { 0.0f };
     std::array<float, fftSize * 2> fftData { 0.0f };
 
-    int fifoIndex { 0 };
+    std::size_t fifoIndex { 0 };
     float currentSampleRate { 44100.0f };
     float lastCalculatedFrequency { 0.0f };
 
