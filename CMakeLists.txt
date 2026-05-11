@@ -51,6 +51,16 @@ target_sources(ReHarmonizer
 )
 
 # ==========================================
+# Compile options
+# ==========================================
+target_compile_options(ReHarmonizer
+    PRIVATE
+    -Wall
+    -Wextra
+    -Wpedantic
+)
+
+# ==========================================
 # Compile definitions
 # ==========================================
 target_compile_definitions(ReHarmonizer
