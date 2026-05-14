@@ -1,12 +1,18 @@
 # ReHarmonizer
 
-*Project in early stage of development*
+A real-time lightweight harmonizing effect synth driven directly by input audio frequency.
+
+ReHarmonizer listens to the pitch of an incoming signal, detects its fundamental frequency
+in real time and uses it to control a built-in synthesizer engine - transforming any 
+monophonic audio source into a dynamically playable harmonic texture.
 
 
 ## Prerequisites
 
+- C++17 compatible compiler
+- CMake 3.22 or higher
 - JUCE 8
-- CMake (version 3.22 or higher)
+
 
 ## Setting up
 
