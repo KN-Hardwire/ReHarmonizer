@@ -22,7 +22,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout ReHarmonizerAudioProcessor::
     layout.add(std::make_unique<juce::AudioParameterFloat>(
         juce::ParameterID(paramGainDb, 1),
         "Gain",
-        juce::NormalisableRange<float> (-60.0f, 3.0f, 0.1f),
+        juce::NormalisableRange<float>(-60.0f, 3.0f, 0.1f),
         0.0f,
         "dB"));
 
@@ -36,6 +36,11 @@ juce::AudioProcessorValueTreeState::ParameterLayout ReHarmonizerAudioProcessor::
 }
 
 ReHarmonizerAudioProcessor::ReHarmonizerAudioProcessor()
+#ifndef JucePlugin_PreferredChannelConfigurations
+	: AudioProcessor(BusesProperties()
+		.withInput("Input", juce::AudioChannelSet::stereo(), true)
+		.withOutput("Output", juce::AudioChannelSet::stereo(), true))
+#endif
 {
 
 }
