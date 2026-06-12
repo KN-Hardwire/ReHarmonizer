@@ -16,16 +16,14 @@ monophonic audio source into a dynamically playable harmonic texture.
 
 ## Setting up
 
-To set up and be able to build the project locally you will need 
-the JUCE framework installed locally. If you're cloning the project 
-for the first time, include a flag to also install JUCE as a submodule:
+Clone the repository with JUCE submodule:
 
 ```
 git clone --recurse-submodules <repo-url>
 ```
 
 If you have already done a 'plain' clone on the repository and need to 
-install the JUCE submodule, from project root run:
+install the JUCE submodule, run:
 
 ```
 git submodule update --init --recursive
@@ -38,12 +36,11 @@ To build the project run this from project root path:
 
 ```
 cmake -B build
-cd build
-make
+cmake --build build
 ```
 
-If the building process was succesful you should see relevant artefacts 
-in the build directory (plugin in formats VST3, AU and Standalone).
+Relevant build artefacts will be in the build directory (plugin in formats VST3, 
+AU (if on macOS) and Standalone).
 
 
 ## License
