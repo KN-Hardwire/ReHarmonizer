@@ -47,6 +47,28 @@ ReHarmonizerAudioProcessorEditor::ReHarmonizerAudioProcessorEditor(ReHarmonizerA
     gainLabel.attachToComponent(&gainKnob, false);
     addAndMakeVisible(gainLabel);
 
+    attackKnob.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
+    attackKnob.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 60, 20);
+    attackKnob.setRange(0.0, 5000.0, 1.0);
+    attackKnob.setTextValueSuffix(" ms");
+    addAndMakeVisible(attackKnob);
+
+    attackLabel.setText("Attack", juce::dontSendNotification);
+    attackLabel.setJustificationType(juce::Justification::centred);
+    attackLabel.attachToComponent(&attackKnob, false);
+    addAndMakeVisible(attackLabel);
+
+    releaseKnob.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
+    releaseKnob.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 60, 20);
+    releaseKnob.setRange(0.0, 5000.0, 1.0);
+    releaseKnob.setTextValueSuffix(" ms");
+    addAndMakeVisible(releaseKnob);
+
+    releaseLabel.setText("Release", juce::dontSendNotification);
+    releaseLabel.setJustificationType(juce::Justification::centred);
+    releaseLabel.attachToComponent(&releaseKnob, false);
+    addAndMakeVisible(releaseLabel);
+
     waveformSelector.addItem("Sine", 1);
     waveformSelector.addItem("Square", 2);
     waveformSelector.addItem("Sawtooth", 3);
@@ -90,11 +112,13 @@ void ReHarmonizerAudioProcessorEditor::resized()
     area.reduce(20, 40);
 
     int knobSize = 100;
-    int spacing = 20;
+    int spacing = 10;
 
     blendKnob.setBounds(area.getX(), area.getY(), knobSize, knobSize);
     pitchCorrectKnob.setBounds(blendKnob.getRight() + spacing, area.getY(), knobSize, knobSize);
     gainKnob.setBounds(pitchCorrectKnob.getRight() + spacing, area.getY(), knobSize, knobSize);
+    attackKnob.setBounds(gainKnob.getRight() + spacing, area.getY(), knobSize, knobSize);
+    releaseKnob.setBounds(attackKnob.getRight() + spacing, area.getY(), knobSize, knobSize);
 
     waveformSelector.setBounds(area.getX(), blendKnob.getBottom() + 40, 150, 30);
 }

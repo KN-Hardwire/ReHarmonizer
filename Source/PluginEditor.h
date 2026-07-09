@@ -22,11 +22,15 @@ private:
     juce::Slider blendKnob;
     juce::Slider pitchCorrectKnob;
     juce::Slider gainKnob;
+    juce::Slider attackKnob;
+    juce::Slider releaseKnob;
     juce::ComboBox waveformSelector;
 
     juce::Label blendLabel;
     juce::Label pitchCorrectLabel;
     juce::Label gainLabel;
+    juce::Label attackLabel;
+    juce::Label releaseLabel;
     juce::Label waveformLabel;
 
     using SliderAttachment = juce::AudioProcessorValueTreeState::SliderAttachment;
