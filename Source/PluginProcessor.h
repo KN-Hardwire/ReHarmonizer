@@ -43,6 +43,8 @@ public:
     static constexpr const char* paramBlend = "blend";
     static constexpr const char* paramPitchCorrect = "pitchCorrect";
     static constexpr const char* paramGainDb = "gainDb";
+    static constexpr const char* paramAttack = "attack";
+    static constexpr const char* paramRelease = "release";
     static constexpr const char* paramWaveform = "waveform";
 
 	static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
@@ -55,6 +57,10 @@ private:
 	FrequencyDetector freqDetector;
 	std::atomic<float> dominantFrequency{ 0.0f };
 	Oscillator oscillator;
+
+    double currentSampleRate { 44100.0 };
+    float envelopeLevel { 0.0f };
+    float lastValidFrequency { 440.0f };
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ReHarmonizerAudioProcessor)
 };

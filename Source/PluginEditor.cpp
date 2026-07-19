@@ -49,8 +49,6 @@ ReHarmonizerAudioProcessorEditor::ReHarmonizerAudioProcessorEditor(ReHarmonizerA
 
     attackKnob.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
     attackKnob.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 60, 20);
-    attackKnob.setRange(0.0, 5000.0, 1.0);
-    attackKnob.setTextValueSuffix(" ms");
     addAndMakeVisible(attackKnob);
 
     attackLabel.setText("Attack", juce::dontSendNotification);
@@ -60,8 +58,6 @@ ReHarmonizerAudioProcessorEditor::ReHarmonizerAudioProcessorEditor(ReHarmonizerA
 
     releaseKnob.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
     releaseKnob.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 60, 20);
-    releaseKnob.setRange(0.0, 5000.0, 1.0);
-    releaseKnob.setTextValueSuffix(" ms");
     addAndMakeVisible(releaseKnob);
 
     releaseLabel.setText("Release", juce::dontSendNotification);
@@ -88,6 +84,12 @@ ReHarmonizerAudioProcessorEditor::ReHarmonizerAudioProcessorEditor(ReHarmonizerA
     gainAttachment = std::make_unique<SliderAttachment>(audioProcessor.apvts,
                                                         ReHarmonizerAudioProcessor::paramGainDb,
                                                         gainKnob);
+    attackAttachment = std::make_unique<SliderAttachment>(audioProcessor.apvts,
+                                                          ReHarmonizerAudioProcessor::paramAttack,
+                                                          attackKnob);
+    releaseAttachment = std::make_unique<SliderAttachment>(audioProcessor.apvts,
+                                                           ReHarmonizerAudioProcessor::paramRelease,
+                                                           releaseKnob);
     waveformAttachment = std::make_unique<ComboBoxAttachment>(audioProcessor.apvts,
                                                               ReHarmonizerAudioProcessor::paramWaveform,
                                                               waveformSelector);

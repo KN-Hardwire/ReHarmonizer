@@ -2,6 +2,22 @@
 #include "PluginEditor.h"
 #include <cmath>
 
+namespace
+{
+    float computeEnvelopeStep(float timeMs, double sampleRate)
+    {
+        if (timeMs <= 0.0f)
+            return 1.0f;
+
+        return 1.0f / static_cast<float>(timeMs * 0.001 * sampleRate);
+    }
+
+    bool isPitchValid(float frequencyHz)
+    {
+        return std::isfinite(frequencyHz) && frequencyHz >= 20.0f && frequencyHz <= 20000.0f;
+    }
+}
+
 juce::AudioProcessorValueTreeState::ParameterLayout ReHarmonizerAudioProcessor::createParameterLayout()
 {
     juce::AudioProcessorValueTreeState::ParameterLayout layout;
@@ -25,6 +41,20 @@ juce::AudioProcessorValueTreeState::ParameterLayout ReHarmonizerAudioProcessor::
         juce::NormalisableRange<float>(-60.0f, 3.0f, 0.1f),
         0.0f,
         "dB"));
+
+    layout.add(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID(paramAttack, 1),
+        "Attack",
+        juce::NormalisableRange<float>(0.0f, 5000.0f, 1.0f),
+        0.0f,
+        "ms"));
+
+    layout.add(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID(paramRelease, 1),
+        "Release",
+        juce::NormalisableRange<float>(0.0f, 5000.0f, 1.0f),
+        0.0f,
+        "ms"));
 
     layout.add(std::make_unique<juce::AudioParameterChoice>(
         juce::ParameterID(paramWaveform, 1),
@@ -73,7 +103,7 @@ bool ReHarmonizerAudioProcessor::isMidiEffect() const
 
 double ReHarmonizerAudioProcessor::getTailLengthSeconds() const
 {
-    return 0.0;
+    return static_cast<double>(apvts.getRawParameterValue(paramRelease)->load()) * 0.001;
 }
 
 int ReHarmonizerAudioProcessor::getNumPrograms()
@@ -106,9 +136,11 @@ void ReHarmonizerAudioProcessor::changeProgramName(int index, const juce::String
 void ReHarmonizerAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 {
     juce::ignoreUnused(samplesPerBlock);
+    currentSampleRate = sampleRate;
     freqDetector.prepare(sampleRate);
     oscillator.setSampleRate(sampleRate);
     oscillator.reset();
+    envelopeLevel = 0.0f;
 }
 
 void ReHarmonizerAudioProcessor::releaseResources()
@@ -132,43 +164,57 @@ void ReHarmonizerAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, 
 {
     juce::ignoreUnused(midiMessages);
     juce::ScopedNoDenormals noDenormals;
-    auto totalNumInputChannels = getTotalNumInputChannels();
 
-    for (int sample = 0; sample < buffer.getNumSamples(); ++sample)
-    {
-        float monoSample = 0.0f;
-        for (int channel = 0; channel < totalNumInputChannels; ++channel) {
-            monoSample += buffer.getReadPointer(channel)[sample];
-        }   // Summing samples from all channels
-        monoSample /= static_cast<float>(totalNumInputChannels); // Calculate average to remove distortion
-        freqDetector.processSample(monoSample);
-        dominantFrequency.store(freqDetector.getFrequency());
-    }
+    const auto totalNumInputChannels = getTotalNumInputChannels();
+    const auto numChannels = buffer.getNumChannels();
+    const auto numSamples = buffer.getNumSamples();
 
-    const auto detectedHz = dominantFrequency.load();
-    const bool detectedHzValid = std::isfinite(detectedHz) && detectedHz >= 20.0f && detectedHz <= 20000.0f;
-    if (!detectedHzValid)
+    if (totalNumInputChannels == 0 || numSamples == 0)
         return;
 
     const float blend = juce::jlimit(0.0f, 1.0f, apvts.getRawParameterValue(paramBlend)->load());
     const float pitchCorrectSemis = apvts.getRawParameterValue(paramPitchCorrect)->load();
     const float gainDb = apvts.getRawParameterValue(paramGainDb)->load();
+    const float attackMs = apvts.getRawParameterValue(paramAttack)->load();
+    const float releaseMs = apvts.getRawParameterValue(paramRelease)->load();
     const int waveformIndex = static_cast<int>(apvts.getRawParameterValue(paramWaveform)->load());
 
-    oscillator.setWaveform(static_cast<Oscillator::Waveform>(juce::jlimit (0, 3, waveformIndex)));
+    oscillator.setWaveform(static_cast<Oscillator::Waveform>(juce::jlimit(0, 3, waveformIndex)));
 
     const float pitchRatio = std::pow(2.0f, pitchCorrectSemis / 12.0f);
-    oscillator.setFrequency(detectedHz * pitchRatio);
-
     const float oscGain = juce::Decibels::decibelsToGain(gainDb);
     const float dryMix = 1.0f - blend;
-
-    const int numChannels = buffer.getNumChannels();
-    const int numSamples = buffer.getNumSamples();
+    const float attackStep = computeEnvelopeStep(attackMs, currentSampleRate);
+    const float releaseStep = computeEnvelopeStep(releaseMs, currentSampleRate);
 
     for (int sample = 0; sample < numSamples; ++sample)
     {
-        const float oscSample = oscillator.processSample() * oscGain;
+        float monoSample = 0.0f;
+        for (int channel = 0; channel < totalNumInputChannels; ++channel)
+            monoSample += buffer.getReadPointer(channel)[sample];
+
+        monoSample /= static_cast<float>(totalNumInputChannels);
+
+        freqDetector.processSample(monoSample);
+        const float detectedHz = freqDetector.getFrequency();
+        dominantFrequency.store(detectedHz);
+
+        if (isPitchValid(detectedHz))
+        {
+            lastValidFrequency = detectedHz;
+            envelopeLevel = std::min(1.0f, envelopeLevel + attackStep);
+        }
+        else
+        {
+            envelopeLevel = std::max(0.0f, envelopeLevel - releaseStep);
+        }
+
+        float oscSample = 0.0f;
+        if (blend > 0.0f && envelopeLevel > 0.0f)
+        {
+            oscillator.setFrequency(lastValidFrequency * pitchRatio);
+            oscSample = oscillator.processSample() * oscGain * envelopeLevel;
+        }
 
         for (int channel = 0; channel < numChannels; ++channel)
         {
