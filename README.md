@@ -1,48 +1,73 @@
+<div align="center">
+
 # ReHarmonizer
 
-A real-time lightweight harmonizing effect synth driven directly by input audio frequency.
+### *Real-time lightweight harmonizing effect synth driven directly by input audio frequency.*
 
-ReHarmonizer listens to the pitch of an incoming signal, detects its fundamental frequency
-in real time and uses it to control a built-in synthesizer engine - transforming any 
-monophonic audio source into a dynamically playable harmonic texture.
+<b>Framework:</b> JUCE 8 &nbsp;&nbsp;|&nbsp;&nbsp; <b>Language:</b> C++17
 
+---
+
+ [Features](#features) • [Prerequisites](#prerequisites) • [Setting Up](#setting-up) • [Building](#building) • [License](#license)
+
+---
+
+</div>
+
+## Features
+
+ReHarmonizer listens to the pitch of an incoming signal, detects its fundamental frequency in real time and uses it to control a built-in synthesizer engine - transforming any monophonic audio source into a dynamically playable harmonic texture. 
+
+---
 
 ## Prerequisites
 
-- C++17 compatible compiler
-- CMake 3.22 or higher
-- JUCE 8
+| Requirement | Specification |
+| :--- | :--- |
+| **Compiler** | C++17 compatible compiler |
+| **Build System** | CMake 3.22 or higher |
+| **Framework** | JUCE 8 |
 
+---
 
-## Setting up
+## Setting Up
 
-Clone the repository with JUCE submodule:
-
-```
+### Clone the Repository
+To get the source code along with the JUCE submodule, run the following command:
+```bash
 git clone --recurse-submodules <repo-url>
 ```
 
-If you have already done a 'plain' clone on the repository and need to 
-install the JUCE submodule, run:
-
-```
+### Missing Submodules
+If you already did a plain clone and need to fetch the JUCE submodule, execute:
+```bash
 git submodule update --init --recursive
 ```
 
+---
 
 ## Building
 
-To build the project run this from project root path:
+Execute the following commands from the project root path to build the project:
 
-```
+```bash
 cmake -B build
 cmake --build build
 ```
 
-Relevant build artefacts will be in the build directory (plugin in formats VST3, 
-AU (if on macOS) and Standalone).
+### Build Artifacts
+After a successful build, relevant artifacts will be in the `build` directory:
+* plugin in formats **VST3**
+* **AU** (macOS only)
+* **Standalone**
 
+---
 
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
+
+---
+<div align="center">
+  <sub>ReHarmonizer • KN-Hardwire</sub>
+</div>
