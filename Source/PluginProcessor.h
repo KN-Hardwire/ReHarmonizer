@@ -4,6 +4,7 @@
 #include <juce_dsp/juce_dsp.h>
 #include "FrequencyDetector.h"
 #include "Oscillator.h"
+#include "PitchQuantizer.h"
 
 class ReHarmonizerAudioProcessor : public juce::AudioProcessor
 {
@@ -46,6 +47,9 @@ public:
     static constexpr const char* paramAttack = "attack";
     static constexpr const char* paramRelease = "release";
     static constexpr const char* paramWaveform = "waveform";
+    static constexpr const char* paramQuantizationLevel = "quantizationLevel";
+    static constexpr const char* paramQuantizerKey = "quantizerKey";
+    static constexpr const char* paramScaleMode = "scaleMode";
 
 	static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
     juce::AudioProcessorValueTreeState apvts{ *this,
@@ -56,6 +60,7 @@ public:
 private:
 	FrequencyDetector freqDetector;
 	std::atomic<float> dominantFrequency{ 0.0f };
+	PitchQuantizer pitchQuantizer;
 	Oscillator oscillator;
 
     double currentSampleRate { 44100.0 };

@@ -62,6 +62,25 @@ juce::AudioProcessorValueTreeState::ParameterLayout ReHarmonizerAudioProcessor::
         juce::StringArray{ "Sine", "Square", "Sawtooth", "Triangle" },
         0));
 
+    layout.add(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID(paramQuantizationLevel, 1),
+        "Quantization",
+        juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
+        0.0f));
+
+    layout.add(std::make_unique<juce::AudioParameterChoice>(
+        juce::ParameterID(paramQuantizerKey, 1),
+        "Key",
+        juce::StringArray{ "C", "C#", "D", "D#", "E", "F",
+                           "F#", "G", "G#", "A", "A#", "B" },
+        static_cast<int>(PitchQuantizer::Key::C)));
+
+    layout.add(std::make_unique<juce::AudioParameterChoice>(
+        juce::ParameterID(paramScaleMode, 1),
+        "Scale Mode",
+        juce::StringArray{ "Major", "Minor" },
+        static_cast<int>(PitchQuantizer::ScaleMode::Major)));
+
     return layout;
 }
 
@@ -72,7 +91,6 @@ ReHarmonizerAudioProcessor::ReHarmonizerAudioProcessor()
 		.withOutput("Output", juce::AudioChannelSet::stereo(), true))
 #endif
 {
-
 }
 
 ReHarmonizerAudioProcessor::~ReHarmonizerAudioProcessor()
@@ -178,8 +196,21 @@ void ReHarmonizerAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, 
     const float attackMs = apvts.getRawParameterValue(paramAttack)->load();
     const float releaseMs = apvts.getRawParameterValue(paramRelease)->load();
     const int waveformIndex = static_cast<int>(apvts.getRawParameterValue(paramWaveform)->load());
+    const float quantizationLevel = juce::jlimit(
+        0.0f, 1.0f, apvts.getRawParameterValue(paramQuantizationLevel)->load());
+    const int quantizerKeyIndex = juce::jlimit(
+        static_cast<int>(PitchQuantizer::Key::C),
+        static_cast<int>(PitchQuantizer::Key::B),
+        static_cast<int>(apvts.getRawParameterValue(paramQuantizerKey)->load()));
+    const int scaleModeIndex = juce::jlimit(
+        static_cast<int>(PitchQuantizer::ScaleMode::Major),
+        static_cast<int>(PitchQuantizer::ScaleMode::Minor),
+        static_cast<int>(apvts.getRawParameterValue(paramScaleMode)->load()));
 
     oscillator.setWaveform(static_cast<Oscillator::Waveform>(juce::jlimit(0, 3, waveformIndex)));
+    pitchQuantizer.setQuantizationLevel(quantizationLevel);
+    pitchQuantizer.setKey(static_cast<PitchQuantizer::Key>(quantizerKeyIndex));
+    pitchQuantizer.setScaleMode(static_cast<PitchQuantizer::ScaleMode>(scaleModeIndex));
 
     const float pitchRatio = std::pow(2.0f, pitchCorrectSemis / 12.0f);
     const float oscGain = juce::Decibels::decibelsToGain(gainDb);
@@ -201,7 +232,8 @@ void ReHarmonizerAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, 
 
         if (isPitchValid(detectedHz))
         {
-            lastValidFrequency = detectedHz;
+            pitchQuantizer.processFrequency(detectedHz);
+            lastValidFrequency = pitchQuantizer.getQuantizedFrequency();
             envelopeLevel = std::min(1.0f, envelopeLevel + attackStep);
         }
         else

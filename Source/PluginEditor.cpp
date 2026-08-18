@@ -3,8 +3,8 @@
 
 namespace EditorConstants
 {
-    constexpr int windowWidth{ 600 };
-    constexpr int windowHeight{ 400 };
+    constexpr int windowWidth{ 720 };
+    constexpr int windowHeight{ 430 };
 }
 
 ReHarmonizerAudioProcessorEditor::ReHarmonizerAudioProcessorEditor(ReHarmonizerAudioProcessor& p)
@@ -65,6 +65,15 @@ ReHarmonizerAudioProcessorEditor::ReHarmonizerAudioProcessorEditor(ReHarmonizerA
     releaseLabel.attachToComponent(&releaseKnob, false);
     addAndMakeVisible(releaseLabel);
 
+    quantizationLevelKnob.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
+    quantizationLevelKnob.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 60, 20);
+    addAndMakeVisible(quantizationLevelKnob);
+
+    quantizationLevelLabel.setText("Quantization", juce::dontSendNotification);
+    quantizationLevelLabel.setJustificationType(juce::Justification::centred);
+    quantizationLevelLabel.attachToComponent(&quantizationLevelKnob, false);
+    addAndMakeVisible(quantizationLevelLabel);
+
     waveformSelector.addItem("Sine", 1);
     waveformSelector.addItem("Square", 2);
     waveformSelector.addItem("Sawtooth", 3);
@@ -74,6 +83,21 @@ ReHarmonizerAudioProcessorEditor::ReHarmonizerAudioProcessorEditor(ReHarmonizerA
     waveformLabel.setText("Waveform", juce::dontSendNotification);
     waveformLabel.attachToComponent(&waveformSelector, false);
     addAndMakeVisible(waveformLabel);
+
+    keySelector.addItemList({ "C", "C#", "D", "D#", "E", "F",
+                              "F#", "G", "G#", "A", "A#", "B" }, 1);
+    addAndMakeVisible(keySelector);
+
+    keyLabel.setText("Key", juce::dontSendNotification);
+    keyLabel.attachToComponent(&keySelector, false);
+    addAndMakeVisible(keyLabel);
+
+    scaleModeSelector.addItemList({ "Major", "Minor" }, 1);
+    addAndMakeVisible(scaleModeSelector);
+
+    scaleModeLabel.setText("Scale Mode", juce::dontSendNotification);
+    scaleModeLabel.attachToComponent(&scaleModeSelector, false);
+    addAndMakeVisible(scaleModeLabel);
 
     blendAttachment = std::make_unique<SliderAttachment>(audioProcessor.apvts,
                                                          ReHarmonizerAudioProcessor::paramBlend,
@@ -90,9 +114,19 @@ ReHarmonizerAudioProcessorEditor::ReHarmonizerAudioProcessorEditor(ReHarmonizerA
     releaseAttachment = std::make_unique<SliderAttachment>(audioProcessor.apvts,
                                                            ReHarmonizerAudioProcessor::paramRelease,
                                                            releaseKnob);
+    quantizationLevelAttachment = std::make_unique<SliderAttachment>(
+        audioProcessor.apvts,
+        ReHarmonizerAudioProcessor::paramQuantizationLevel,
+        quantizationLevelKnob);
     waveformAttachment = std::make_unique<ComboBoxAttachment>(audioProcessor.apvts,
                                                               ReHarmonizerAudioProcessor::paramWaveform,
                                                               waveformSelector);
+    keyAttachment = std::make_unique<ComboBoxAttachment>(audioProcessor.apvts,
+                                                         ReHarmonizerAudioProcessor::paramQuantizerKey,
+                                                         keySelector);
+    scaleModeAttachment = std::make_unique<ComboBoxAttachment>(audioProcessor.apvts,
+                                                               ReHarmonizerAudioProcessor::paramScaleMode,
+                                                               scaleModeSelector);
 }
 
 ReHarmonizerAudioProcessorEditor::~ReHarmonizerAudioProcessorEditor()
@@ -111,18 +145,35 @@ void ReHarmonizerAudioProcessorEditor::resized()
     
     frequencyLabel.setBounds(area.removeFromTop(100).withSizeKeepingCentre(300, 50));
     
-    area.reduce(20, 40);
+    area.reduce(25, 30);
 
-    int knobSize = 100;
-    int spacing = 10;
+    constexpr int knobSize = 95;
+    constexpr int spacing = 20;
 
     blendKnob.setBounds(area.getX(), area.getY(), knobSize, knobSize);
     pitchCorrectKnob.setBounds(blendKnob.getRight() + spacing, area.getY(), knobSize, knobSize);
     gainKnob.setBounds(pitchCorrectKnob.getRight() + spacing, area.getY(), knobSize, knobSize);
     attackKnob.setBounds(gainKnob.getRight() + spacing, area.getY(), knobSize, knobSize);
     releaseKnob.setBounds(attackKnob.getRight() + spacing, area.getY(), knobSize, knobSize);
+    quantizationLevelKnob.setBounds(releaseKnob.getRight() + spacing,
+                                    area.getY(),
+                                    knobSize,
+                                    knobSize);
 
-    waveformSelector.setBounds(area.getX(), blendKnob.getBottom() + 40, 150, 30);
+    constexpr int selectorWidth = 190;
+    constexpr int selectorHeight = 30;
+    constexpr int selectorSpacing = 35;
+    const int selectorY = blendKnob.getBottom() + 55;
+
+    waveformSelector.setBounds(area.getX(), selectorY, selectorWidth, selectorHeight);
+    keySelector.setBounds(waveformSelector.getRight() + selectorSpacing,
+                          selectorY,
+                          selectorWidth,
+                          selectorHeight);
+    scaleModeSelector.setBounds(keySelector.getRight() + selectorSpacing,
+                                selectorY,
+                                selectorWidth,
+                                selectorHeight);
 }
 
 void ReHarmonizerAudioProcessorEditor::timerCallback()
