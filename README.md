@@ -8,6 +8,8 @@
 
 ---
 
+![ReHarmonizer plugin interface](.github/reharmonizer_demo_screenshot.png)
+
  [Features](#features) • [Prerequisites](#prerequisites) • [Setting Up](#setting-up) • [Building](#building) • [License](#license)
 
 ---
