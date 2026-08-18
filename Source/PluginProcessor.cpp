@@ -1,5 +1,6 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
+#include <algorithm>
 #include <cmath>
 
 namespace
@@ -91,6 +92,7 @@ ReHarmonizerAudioProcessor::ReHarmonizerAudioProcessor()
 		.withOutput("Output", juce::AudioChannelSet::stereo(), true))
 #endif
 {
+    clearWaveformDisplay();
 }
 
 ReHarmonizerAudioProcessor::~ReHarmonizerAudioProcessor()
@@ -159,6 +161,7 @@ void ReHarmonizerAudioProcessor::prepareToPlay(double sampleRate, int samplesPer
     oscillator.setSampleRate(sampleRate);
     oscillator.reset();
     envelopeLevel = 0.0f;
+    clearWaveformDisplay();
 }
 
 void ReHarmonizerAudioProcessor::releaseResources()
@@ -248,12 +251,60 @@ void ReHarmonizerAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, 
             oscSample = oscillator.processSample() * oscGain * envelopeLevel;
         }
 
+        float outputMonoSample = 0.0f;
         for (int channel = 0; channel < numChannels; ++channel)
         {
             auto* writePtr = buffer.getWritePointer(channel);
-            writePtr[sample] = writePtr[sample] * dryMix + oscSample * blend;
+            const float outputSample = writePtr[sample] * dryMix + oscSample * blend;
+            writePtr[sample] = outputSample;
+            outputMonoSample += outputSample;
         }
+
+        outputMonoSample /= static_cast<float>(numChannels);
+        pushWaveformDisplaySample(monoSample, outputMonoSample);
     }
+}
+
+void ReHarmonizerAudioProcessor::copyWaveformDisplaySamples(
+    std::array<float, waveformDisplayBufferSize>& inputSamples,
+    std::array<float, waveformDisplayBufferSize>& outputSamples) const noexcept
+{
+    const auto writeCount = publishedWaveformWriteCounter.load(std::memory_order_acquire);
+    const auto availableSamples = juce::jmin(writeCount, waveformDisplayBufferSize);
+    const auto leadingSilence = waveformDisplayBufferSize - availableSamples;
+    const auto firstSample = writeCount - availableSamples;
+
+    std::fill_n(inputSamples.begin(), leadingSilence, 0.0f);
+    std::fill_n(outputSamples.begin(), leadingSilence, 0.0f);
+
+    for (std::size_t sample = 0; sample < availableSamples; ++sample)
+    {
+        const auto sourceIndex = (firstSample + sample) % waveformDisplayBufferSize;
+        const auto destinationIndex = leadingSilence + sample;
+        inputSamples[destinationIndex] = inputWaveformSamples[sourceIndex].load(std::memory_order_relaxed);
+        outputSamples[destinationIndex] = outputWaveformSamples[sourceIndex].load(std::memory_order_relaxed);
+    }
+}
+
+void ReHarmonizerAudioProcessor::clearWaveformDisplay() noexcept
+{
+    for (auto& sample : inputWaveformSamples)
+        sample.store(0.0f, std::memory_order_relaxed);
+
+    for (auto& sample : outputWaveformSamples)
+        sample.store(0.0f, std::memory_order_relaxed);
+
+    waveformWriteCounter = 0;
+    publishedWaveformWriteCounter.store(0, std::memory_order_release);
+}
+
+void ReHarmonizerAudioProcessor::pushWaveformDisplaySample(float inputSample,
+                                                            float outputSample) noexcept
+{
+    const auto destinationIndex = waveformWriteCounter % waveformDisplayBufferSize;
+    inputWaveformSamples[destinationIndex].store(inputSample, std::memory_order_relaxed);
+    outputWaveformSamples[destinationIndex].store(outputSample, std::memory_order_relaxed);
+    publishedWaveformWriteCounter.store(++waveformWriteCounter, std::memory_order_release);
 }
 
 //==============================================================================

@@ -3,6 +3,34 @@
 #include "PluginProcessor.h"
 #include <memory>
 
+class ReHarmonizerLookAndFeel final : public juce::LookAndFeel_V4
+{
+public:
+    ReHarmonizerLookAndFeel();
+
+    void drawRotarySlider(juce::Graphics&,
+                          int x,
+                          int y,
+                          int width,
+                          int height,
+                          float sliderPos,
+                          float rotaryStartAngle,
+                          float rotaryEndAngle,
+                          juce::Slider&) override;
+
+    void drawComboBox(juce::Graphics&,
+                      int width,
+                      int height,
+                      bool isButtonDown,
+                      int buttonX,
+                      int buttonY,
+                      int buttonWidth,
+                      int buttonHeight,
+                      juce::ComboBox&) override;
+
+    void positionComboBoxText(juce::ComboBox&, juce::Label&) override;
+};
+
 class ReHarmonizerAudioProcessorEditor : public juce::AudioProcessorEditor, public juce::Timer
 {
 public:
@@ -16,6 +44,17 @@ public:
 
 private:
     ReHarmonizerAudioProcessor& audioProcessor;
+    ReHarmonizerLookAndFeel lookAndFeel;
+
+    juce::Rectangle<int> waveformPanelBounds;
+    juce::Rectangle<int> mainControlsPanelBounds;
+    juce::Rectangle<int> envelopePanelBounds;
+    juce::Rectangle<int> pitchCorrectionPanelBounds;
+    juce::Rectangle<int> waveformGraphBounds;
+    juce::Rectangle<int> envelopeGraphBounds;
+
+    std::array<float, ReHarmonizerAudioProcessor::waveformDisplayBufferSize> inputWaveformDisplay {};
+    std::array<float, ReHarmonizerAudioProcessor::waveformDisplayBufferSize> outputWaveformDisplay {};
 
     juce::Label frequencyLabel;
 
@@ -51,6 +90,9 @@ private:
     std::unique_ptr<ComboBoxAttachment> waveformAttachment;
     std::unique_ptr<ComboBoxAttachment> keyAttachment;
     std::unique_ptr<ComboBoxAttachment> scaleModeAttachment;
+
+    void drawWaveformDisplay(juce::Graphics&) const;
+    void drawEnvelopeDisplay(juce::Graphics&) const;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ReHarmonizerAudioProcessorEditor)
 };

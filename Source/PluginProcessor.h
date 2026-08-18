@@ -2,6 +2,7 @@
 
 #include <juce_audio_processors/juce_audio_processors.h>
 #include <juce_dsp/juce_dsp.h>
+#include <array>
 #include "FrequencyDetector.h"
 #include "Oscillator.h"
 #include "PitchQuantizer.h"
@@ -41,6 +42,11 @@ public:
 
     float getDominantFrequency() const { return dominantFrequency.load(); }
 
+    static constexpr std::size_t waveformDisplayBufferSize { 1024 };
+    void copyWaveformDisplaySamples(
+        std::array<float, waveformDisplayBufferSize>& inputSamples,
+        std::array<float, waveformDisplayBufferSize>& outputSamples) const noexcept;
+
     static constexpr const char* paramBlend = "blend";
     static constexpr const char* paramPitchCorrect = "pitchCorrect";
     static constexpr const char* paramGainDb = "gainDb";
@@ -66,6 +72,14 @@ private:
     double currentSampleRate { 44100.0 };
     float envelopeLevel { 0.0f };
     float lastValidFrequency { 440.0f };
+
+    std::array<std::atomic<float>, waveformDisplayBufferSize> inputWaveformSamples;
+    std::array<std::atomic<float>, waveformDisplayBufferSize> outputWaveformSamples;
+    std::size_t waveformWriteCounter { 0 };
+    std::atomic<std::size_t> publishedWaveformWriteCounter { 0 };
+
+    void clearWaveformDisplay() noexcept;
+    void pushWaveformDisplaySample(float inputSample, float outputSample) noexcept;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ReHarmonizerAudioProcessor)
 };
