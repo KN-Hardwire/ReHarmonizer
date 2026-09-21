@@ -8,8 +8,6 @@
 
 ---
 
-![ReHarmonizer plugin interface](.github/reharmonizer_demo_screenshot.png)
-
  [Features](#features) • [Prerequisites](#prerequisites) • [Setting Up](#setting-up) • [Building](#building) • [License](#license)
 
 ---
@@ -19,6 +17,8 @@
 ## Features
 
 ReHarmonizer listens to the pitch of an incoming signal, detects its fundamental frequency in real time and uses it to control a built-in synthesizer engine - transforming any monophonic audio source into a dynamically playable harmonic texture. 
+
+![ReHarmonizer plugin interface](.github/reharmonizer_demo_screenshot.png)
 
 ---
 
